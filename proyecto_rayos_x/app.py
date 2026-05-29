@@ -134,4 +134,100 @@ with col1:
                         objeto_detectado = f"Elemento Común ({nombre_objeto})"
                         color_caja = "#00E676" 
                     
-                    dibujo.rectangle(box, outline=color_caja
+                    # Corrección del SyntaxError: Cerrando correctamente el método rectangle
+                    dibujo.rectangle(box, outline=color_caja, width=5)
+                    dibujo.text((box[0] + 5, box[1] + 5), f"{nombre_objeto.upper()} ({confianza}%)", fill=color_caja)
+                    
+                    datos_inventario.append({
+                        "Capa Neuronal": "Output Layer",
+                        "Objeto": nombre_objeto.upper(),
+                        "Clasificación": objeto_detectado,
+                        "Confianza": f"{confianza}%"
+                    })
+                logs_red.append(f"[{timestamp}] [WARN] Amenazas o elementos detectados por el Transformer.")
+            else:
+                objeto_detectado = "Ninguno detectado por umbral"
+                logs_red.append(f"[{timestamp}] [INFO] No se superó el umbral de activación.")
+                
+            status.update(label="Análisis completado con éxito", state="complete")
+        
+        st.image(imagen, caption="Imagen analizada por la consola de visión.", use_container_width=True)
+
+with col2:
+    st.subheader("Asistente Normativo de Seguridad")
+    tab1, tab2, tab3, tab4 = st.tabs(["Agente Experto Gemini", "Capa de Tensores", "Atención Neuronal", "Logs del Servidor"])
+    
+    with tab1:
+        st.markdown("Consulte las regulaciones vigentes y protocolos aduaneros aplicables.")
+        pregunta_usuario = st.text_input("Introduzca la consulta sobre la normativa de equipaje:")
+        
+        if pregunta_usuario:
+            st.chat_message("user").write(pregunta_usuario)
+            
+            with st.chat_message("assistant"):
+                if not gemini_key:
+                    st.warning("Introduzca su API Key en la barra lateral para habilitar el motor de análisis avanzado.")
+                    st.markdown(f"**Dictamen rápido:** Detección actual: `{objeto_detectado}`. Según el Anexo 17 de la OACI, los elementos considerados peligrosos deben ser inspeccionados de forma manual.")
+                else:
+                    try:
+                        # Inicializar cliente oficial de Gemini
+                        client = genai.Client(api_key=gemini_key)
+                        
+                        instrucciones_sistema = (
+                            "Eres un Auditor Senior de Seguridad Aeroportuaria y experto internacional en regulaciones aduaneras de la OACI. "
+                            "Genera un dictamen técnico extremadamente formal, profesional y detallado. "
+                            "Debes citar normativas específicas (como el Anexo 17 de la OACI) y explicar de forma concisa y directa el riesgo "
+                            f"técnico u operativo del hallazgo. Información enviada por el Vision Transformer local: {objeto_detectado}."
+                        )
+                        
+                        contenidos = [pregunta_usuario]
+                        if imagen_a_procesar is not None:
+                            contenidos.append(imagen_a_procesar)
+                        
+                        # Generación por streaming (escribe en tiempo real sin congelar la app)
+                        response_stream = client.models.generate_content_stream(
+                            model='gemini-2.5-flash',
+                            contents=contenidos,
+                            config=types.GenerateContentConfig(
+                                system_instruction=instrucciones_sistema,
+                                temperature=0.3
+                            )
+                        )
+                        
+                        # Función generadora de texto para el componente stream de Streamlit
+                        def chunk_generator():
+                            for chunk in response_stream:
+                                if chunk.text:
+                                    yield chunk.text
+                                
+                        st.write_stream(chunk_generator)
+                        
+                    except Exception as e:
+                        st.error(f"Error en el canal de comunicación con Gemini: {str(e)}")
+                            
+        if objeto_detectado != "Ninguno":
+            reporte_texto = f"ACTA DE INSPECCIÓN DE EQUIPAJE\nResultado: {objeto_detectado}\nGenerado por Consola Transformer."
+            st.download_button("📥 Exportar Reporte de Incidencias", data=reporte_texto, file_name="acta_inspeccion.txt")
+            
+    with tab2:
+        st.markdown("**Vectores Numéricos de Salida (Transformer):**")
+        if len(datos_inventario) > 0:
+            st.table(datos_inventario)
+        else:
+            st.info("Sin tensores de salida en este cuadro.")
+            
+    with tab3:
+        st.markdown("**Mapa de Calor de Atención de la Red (Filtros Ocultos):**")
+        if imagen_a_procesar is not None:
+            img_gris = imagen_a_procesar.convert("L")
+            mapa_calor = img_gris.filter(ImageFilter.FIND_EDGES).filter(ImageFilter.GaussianBlur(radius=4))
+            st.image(mapa_calor, use_container_width=True)
+        else:
+            st.info("Inicie el escaneo para mapear la atención.")
+            
+    with tab4:
+        st.markdown("**Consola de Telemetría (Logs en vivo):**")
+        if len(logs_red) > 0:
+            st.markdown(f"<div class='terminal-box'>{'<br>'.join(logs_red)}</div>", unsafe_allow_html=True)
+        else:
+            st.info("Terminal en espera.")
