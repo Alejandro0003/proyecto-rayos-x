@@ -52,9 +52,9 @@ st.title("Control de Seguridad Aeroportuaria- Inspección por Rayos X")
 st.markdown("---")
 
 # Fila Superior: Tarjetas de Métricas de Rendimiento del Modelo de IA
-col_m1 = st.columns(4)
+col_m4 = st.columns(4)
 
-with col_m1:
+with col_m4:
     st.metric(label="Estado del Sistema", value="Operativo")
 
 st.markdown("<br>", unsafe_allow_html=True)
