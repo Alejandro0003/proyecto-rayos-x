@@ -1,0 +1,6 @@
+streamlit
+transformers
+torch --index-url https://download.pytorch.org/whl/cpu
+pillow
+timm
+google-generativeai
