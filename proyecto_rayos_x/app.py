@@ -48,13 +48,13 @@ def cargar_modelo_transformer():
 procesador, modelo = cargar_modelo_transformer()
 
 # Encabezado Corporativo
-st.title("Panel de Control de Seguridad - Inspección por Rayos X")
-st.caption("Módulo de Visión por Computador basado en Arquitectura de Redes Transformer (YOLOS-Tiny)")
+st.title("Control de Seguridad Aeroportuaria- Inspección por Rayos X")
 st.markdown("---")
 
 # Fila Superior: Tarjetas de Métricas de Rendimiento del Modelo de IA
-col_m1, col_m2, col_m3, col_m4 = st.columns(4)
-with col_m4:
+col_m1 = st.columns(4)
+
+with col_m1:
     st.metric(label="Estado del Sistema", value="Operativo")
 
 st.markdown("<br>", unsafe_allow_html=True)
