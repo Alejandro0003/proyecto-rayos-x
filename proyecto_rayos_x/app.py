@@ -54,12 +54,6 @@ st.markdown("---")
 
 # Fila Superior: Tarjetas de Métricas de Rendimiento del Modelo de IA
 col_m1, col_m2, col_m3, col_m4 = st.columns(4)
-with col_m1:
-    st.metric(label="Backbone de Visión", value="Transformer Puro")
-with col_m2:
-    st.metric(label="Umbral de Confianza", value="70%")
-with col_m3:
-    st.metric(label="Tiempo de Inferencia", value="142 ms")
 with col_m4:
     st.metric(label="Estado del Sistema", value="Operativo")
 
