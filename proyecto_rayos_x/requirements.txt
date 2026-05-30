@@ -1,6 +1,6 @@
 streamlit
 torch
 transformers
-Pillow
+pillow
 google-genai
-numpy
+python-docx
